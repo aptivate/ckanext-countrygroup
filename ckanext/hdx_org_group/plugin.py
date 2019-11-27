@@ -25,6 +25,7 @@ class HDXGroupPlugin(plugins.SingletonPlugin, lib_plugins.DefaultGroupForm):
     plugins.implements(plugins.IGroupForm, inherit=False)
     plugins.implements(plugins.IGroupController, inherit=True)
     plugins.implements(plugins.IRoutes, inherit=True)
+    plugins.implements(plugins.IActions)
 
     def group_types(self):
         return [group_type]
@@ -126,3 +127,10 @@ class HDXGroupPlugin(plugins.SingletonPlugin, lib_plugins.DefaultGroupForm):
                     controller='ckanext.hdx_org_group.controllers.country_controller:CountryController', action='country_topline')
 
         return map
+
+    # IActions
+    def get_actions(self):
+        from ckanext.hdx_theme.helpers import actions as hdx_actions
+        return {
+            'cached_group_list': hdx_actions.cached_group_list,
+        }
