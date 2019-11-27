@@ -25,12 +25,12 @@ class HDXGroupController(grp.GroupController):
     def index(self):
         user = c.user or c.author
         c.countries = json.dumps(self.get_countries(user))
-        return base.render('group/index.html')
+        return base.render('country/index.html')
 
     def group_worldmap(self):
         user = c.user or c.author
         c.countries = json.dumps(self.get_countries(user))
-        return base.render('group/worldmap.html')
+        return base.render('country/worldmap.html')
 
     def get_countries(self, user):
 
