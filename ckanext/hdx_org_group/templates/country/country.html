@@ -1,0 +1,540 @@
+{% extends "crisis/crisis-base.html" %}
+
+{# The lines below are for analytics #}
+{% block analytics_group_names %}['{{ data.country_dict.name }}']{% endblock %}
+{% block analytics_group_ids %}['{{ data.country_dict.id }}']{% endblock %}
+
+{% block subtitle %}
+    {{ data.country_dict.display_name }}
+{% endblock %}
+
+{% block crisis_map %}
+    {% block crisis_actions %}
+    {% endblock %}
+{% endblock %}
+
+{% block breadcrumb_content %}
+    {% snippet "snippets/other_breadcrumb_item.html", title=_('Groups'), controller='group', action='index', position=2 %}
+    <li class="active">{% link_for data.country_dict.display_name, controller='group', action='read', id=data.country_dict.name %}</li>
+{% endblock %}
+
+{% block crisis_data %}
+    {% set country_active = data.country_dict.activity_level == 'active' %}
+    <div id="countryMapPolygon" style="display: none;">
+        {% if data.country_dict.geojson %}
+            {{ data.country_dict.geojson | safe }}
+        {% endif %}
+    </div>
+    <div class="row">
+        <div class="list-items dataset-content mTB15">
+            <div class="col-xs-12">
+                <h1 class="country-title">{{ data.country_dict.display_name }}</h1>
+            </div>
+            <div class="col-xs-6 mTop8">
+                <div class="base-actions-menu">
+                    <ul>
+                        <li>
+                            {% set num_of_pack = data.stats_section.num_of_datasets %}
+                            {% if num_of_pack%}
+                                <span class="sspBold14">
+                                    <a class="sspBold14" href="?#dataset-filter-start">
+                                        {{ num_of_pack }} {% if num_of_pack != 1 %}{{ _('Datasets') }}{% else %}{{ _('Dataset') }}{% endif %}
+                                    </a>
+                                    {% if data.stats_section.num_of_cods > 0 %}
+                                        (<a href="?ext_cod=1#dataset-filter-start">{{ data.stats_section.num_of_cods }} CODs</a>)
+                                    {% endif %}
+
+                                </span>
+                            {% else %}
+                                <span class="sspBold14">{{ _('0 Datasets') }}</span>
+                            {% endif %}
+                        </li>
+                        <li>
+                            {# TODO: #}
+                            {# remove "and false" when enabling the followers dropdown #}
+                            {# #}
+
+                            {% if c.user and false %}
+                                <span class="dropdown dropdown-on-hover">
+                                    <a href="#" data-toggle="dropdown" data-target="#" data-module-trigger="hover focus click" data-module-placement="bottom" title="cosdalkj">
+                            {% endif %}
+                            {% set num_of_followers = data.stats_section.num_of_followers %}
+                                        <span class="sspBold14">{{ num_of_followers }} {% if num_of_followers != 1 %}{{ _('Followers') }}{% else %}{{ _('Follower') }}{% endif %}</span>
+                            {% if c.user and false %}
+                                    </a>
+                                    <div class="followers-list-popup dropdown-menu bottom">
+                                      <ul class="followers-list">
+                                        <li class="follower-item">
+                                            <a href="https://gravatar.com/" target="_blank" title="Update your avatar at gravatar.com" alt=""><img class="lazyload" data-src="//gravatar.com/avatar/5ca1b02fb7f34474f03aeccc6686ce88?s=20&amp;d=identicon" class="gravatar image" width="20" height="20"></a>
+                                            <a href="/user/amcguire">aidan macguire</a>
+                                            |
+                                            <a href="/user/amcguire">amcguire</a>
+                                        </li>
+                                        <li class="follower-item">
+                                            <a href="https://gravatar.com/" target="_blank" title="Update your avatar at gravatar.com" alt=""><img class="lazyload" data-src="//gravatar.com/avatar/5ca1b02fb7f34474f03aeccc6686ce88?s=20&amp;d=identicon" class="gravatar image" width="20" height="20"></a>
+                                            <a href="/user/amcguire">aidan macguire</a>
+                                            |
+                                            <a href="/user/amcguire">amcguire</a>
+                                        </li>
+
+                                      </ul>
+                                    </div>
+                                </span>
+                            {% endif %}
+                        </li>
+                        <li>
+                            <span class="dropdown dropdown-on-hover">
+                                <a href="#" data-toggle="dropdown" data-target="#" data-module-trigger="hover focus click" data-module-placement="bottom">
+                                    {% set num_of_orgs = data.stats_section.num_of_organizations %}
+                                    <span class="sspBold14">{{ num_of_orgs }} {% if num_of_orgs != 1 %}{{ _('Organisations') }}{% else %}{{ _('Organisation') }}{% endif %}</span>
+                                </a>
+                                <div class="followers-list-popup dropdown-menu bottom">
+                                  <div class="hdx-arrow-wrapper">
+                                  <ul class="followers-list">
+                                    {% for org in data.stats_section.organization_list %}
+                                        <li class="follower-item">
+                                            <a href="{{ org.url }}">{{ org.display_name }}</a>
+                                        </li>
+                                    {% endfor %}
+                                  </ul>
+                                  </div>
+                                </div>
+                            </span>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+            <div class="col-xs-6">
+                {% snippet "country/country_actions_menu.html", country=data.country_dict, can_edit=h.check_access('group_update', {'id': data.country_dict.id}), classes='base-actions-menu followButtonContainer pull-right' %}
+            </div>
+        </div>
+    </div>
+
+    {% if (not data.country_dict.featured_section or data.country_dict.featured_section == 'active') and data.featured_section.show and country_active %}
+    <div class="row featured-section">
+        <div class="col-xs-12">
+            <div class="list-header crisis-list-header">
+                <span class="mL15 list-header-title">
+                    {{ _("Featured") }}
+                </span>
+            </div>
+        </div>
+        <div class="col-xs-12 mTop30">
+            <div class="row">
+                {% for thumbnail in data.featured_section.thumbnail_list %}
+                    <div class="col-xs-4">
+                        <div class="featured-thumbnail">
+                            <img class="lazyload" data-src="{{ thumbnail.thumbnail_url }}">
+                            <div class="overlay">
+                                <div class="featured-thumbnail-content">
+                                    <div>
+                                        <span class="type">{{ thumbnail.type }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="title">{{ thumbnail.display_name }}</span>
+                                    </div>
+                                    <div class="mTop10">
+                                        <a href="{{ thumbnail.url }}" class="action btn btn-large" >Explore</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+
+
+                <div class="col-xs-4">
+                    {% if data.featured_section.event_list | length > 0 %}
+                        <div class="featured-info-block">
+                            <div class="info-title">
+                                {{ _("Events affecting this location") }}:
+                            </div>
+                            <div class="info-list">
+                                <ul>
+                                    {% for item in data.featured_section.event_list %}
+                                        <li>
+                                            <span>{{ item.title }} -</span>
+                                            <ul>
+                                                {% if item.count %}
+                                                <li  class="inline"><a href="{{ item.url }}">{{item.count}} Datasets</a> | </li>
+                                                {% endif %}
+                                                <li class="inline"><a href="/{{ item.type }}/{{ item.name }}">Go to event page</a></li>
+                                            </ul>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if data.featured_section.organization_list | length > 0 %}
+                        <div class="featured-info-block">
+                            <div class="info-title">
+                                {{ _("Most active organisations") }}:
+                            </div>
+                            <div class="info-list">
+                                <ul>
+                                    {% for item in data.featured_section.organization_list %}
+                                        <li>
+                                            <span>{{ item.display_name }} -</span>
+                                            <ul>
+                                                {% if item.count %}
+                                                {% set filtered_by_org_url = h.url_for("group_read", id=data.country_dict.id) + "?organization="+ item.name +"#dataset-filter-start" %}
+                                                <li  class="inline"><a href="{{filtered_by_org_url}}">{{item.count}} Datasets</a> | </li>
+                                                {% endif %}
+                                                <li  class="inline"><a href="{{ item.url }}">Go to org page</a></li>
+                                            </ul>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if data.featured_section.tag_list | length > 0 %}
+                        <div class="featured-info-block">
+                            <div class="info-title">
+                                {{ _("Most used tags") }}:
+                            </div>
+                            <div class="info-list">
+                                <ul>
+                                    {% for item in data.featured_section.tag_list %}
+                                        <li class="inline">
+                                            <a href="{{ item.url }}" class="label label-small">{{ item.display_name }}</a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if (not data.country_dict.key_figures or data.country_dict.key_figures == 'active') and data.widgets.top_line_data_list %}
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="list-header crisis-list-header">
+                <span class="mL15 list-header-title">
+                    {{ _("Key Figures") }}
+                </span>
+            </div>
+        </div>
+        <div id="key-figures-carousel" class="col-xs-12 carousel slide" data-ride="carousel"  data-interval="0">
+            <div class="row">
+                <div class="carousel-inner" role="listbox">
+                {% if country_active %}
+                    {% set loop_items = 3 %}
+                    {% set loop_class = 'col-xs-4' %}
+                {% else %}
+                    {% set loop_items = 4 %}
+                    {% set loop_class = 'col-xs-3' %}
+                {% endif %}
+                {% for value in data.widgets.top_line_data_list %}
+                    {% if (loop.index - 1) is divisibleby loop_items %}
+                        <div class="item {% if (loop.index - 1) == 0 %}active{% endif %}">
+                          <div class="item-center">
+                      {% endif %}
+
+                    <div class="{{ loop_class }}">
+                        {{ h.snippet('crisis/snippets/topline-rw.html',
+                            title=value.indicatorTypeName, value=value.formatted_value,
+                            unit=value.units, notes=value.unitName, source=value.sourceName,
+                            sparkline_json=value.sparklines_json, relief_web_link = value.reliefWebLink,
+                            source_link=value.datasetLink, latest_date=value.datasetUpdateDate) }}
+                    </div>
+
+                    {% if ((loop.index) is divisibleby loop_items) or (loop.index == data.widgets.top_line_data_list|length) %}
+                          </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                </div>
+                <a class="left carousel-chevron" href="javascript:void(0)" role="button" data-slide="prev" onclick="$('#key-figures-carousel').carousel('prev');">
+                    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="right carousel-chevron" href="javascript:void(0)" role="button" data-slide="next" onclick="$('#key-figures-carousel').carousel('next');">
+                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if data.widgets.show and false %}
+    <div class="row">
+        <div class="col-xs-4">
+            <div class="row topline-numbers">
+                <div class="col-xs-12 mTop35 mBottom35 topline-title">
+                    Overview
+                </div>
+
+                <div class="col-xs-12">
+                    <table>
+                        {% for value in data.widgets.top_line_data_list %}
+                            <tr class="indicator">
+                                <td class="name">
+                                    {{ value.indicatorTypeName }}
+                                </td>
+                                <td class="value">
+                                    <span data-module="bs_tooltip" data-toggle="tooltip" data-module-placement="left" title="{{ value.unitName }}">{{ value.formatted_value }}</span>
+                                </td>
+                            </tr>
+                            <tr class="extra-info">
+                                <td colspan="2">
+                                    <span>
+                                        {{ value.sourceName }}
+                                        {%  if value.datasetLink %}
+                                            - <a href="{{ value.datasetLink }}">Data</a>
+                                        {% endif %}
+                                        {%  if value.datasetUpdateDate %}
+                                            - {{ value.datasetUpdateDate }}
+                                        {% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {% for val in data.widgets.chart_data_list %}
+            <div class="col-xs-4">
+                <div class="row topline-charts">
+                    <div class="col-xs-12 mTop35 topline-title">
+                        {{ val.title }}
+                    </div>
+                    <div class="col-xs-12 mTop10 mBottom10">
+                        <span data-module="bs_tooltip" data-toggle="tooltip" data-module-placement="right" title="{{ val.unit }}" class="last-value">{{ val.lastValue }} <span class="last-date">/ {{ val.lastDate[:4] }}</span></span>
+                    </div>
+                    <div class="data hidden">
+                        {{ val.data | safe }}
+                    </div>
+                    <div class="unit-name hidden">
+                        {{ val.unit | safe }}
+                    </div>
+                    <div class="col-xs-12">
+                        <div class="chart-item"></div>
+                    </div>
+                        {{ val.sourceName }}
+                        {%  if val.datasetLink %}
+                            - <a href="{{ val.datasetLink }}">Data</a>
+                        {% endif %}
+                        {%  if val.datasetUpdateDate %}
+                            - {{ val.datasetUpdateDate }}
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+    {% endif %}
+
+    {% if data.data_completness %}
+    <div class="row data-completeness">
+      <div class="col-xs-12">
+        <div class="list-header crisis-list-header">
+          <span class="mL15 mR30 list-header-title">
+              {{ _("Data Completeness") }}
+          </span>
+
+
+          <div class="progress-breakdown progress-header">
+            <span class="progress-blue" style="width: {{100*data.data_completness.stats.dataseries_good_percentage}}%;">
+            </span>
+            <span class="progress-striped" style="width: {{100*data.data_completness.stats.dataseries_not_good_percentage}}%;"></span>
+          </div>
+
+          <span class="mL45 list-header-showall list-completeness">
+            <span>{{data.data_completness.stats.good_dataseries_num}}/{{data.data_completness.stats.total_dataseries_num}} Core Data</span>
+            <span>{{ data.data_completness.stats.total_datasets_num }} Datasets</span>
+            <span>{{ data.data_completness.stats.org_num }} Organisations</span>
+          </span>
+
+          <span class="mL45 pull-right completeness-header-actions">
+              <a class="show-completeness-legend">Show legend</a>
+              <div class="completeness-legend">
+                <div class="hdx-arrow-wrapper"></div>
+                <div class="row">
+                  <div class="col-xs-6">
+                    <div class="legend-title">What is Data Completeness?</div>
+                    <div class="legend-description">
+                      Data Completeness defines
+                      <span class="orange">
+                      a set of core data that are essential for preparedness and emergency response.
+                    </span>
+                      For select countries, the HDX Team and trusted partners evaluate datasets available on HDX and add those meeting the definition of a core data category to the Data Completeness board above. Please help us improve this feature by sending your feedback to
+                      <a href="mailto: hdx@un.org">hdx@un.org</a>.
+                    </div>
+                  </div>
+                  <div class="col-xs-6">
+                    <div class="legend-title">Legend:</div>
+                    <div class="legend-item">
+                      Presence, freshness, and quality of dataset
+                      <ul>
+                        <li>
+                          <span class="progress-breakdown mini"><span class="progress-blue" style="width: 100%;"></span></span>
+                          Dataset fully matches criteria and is up-to-date
+                        </li>
+                        <li>
+                          <span class="progress-breakdown mini"><span class="progress-striped" style="width: 100%;"></span></span>
+                          Dataset partially matches criteria and/or is not up-to-date
+                        </li>
+                        <li>
+                          <span class="progress-breakdown mini"></span>
+                          No dataset found matching the criteria
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <span>Expand</span>
+              <span>
+                <span class="checkbox-slider" style="display: inline-block; top: 5px; margin-left: 3px;">
+                  <input id="expand-data-completeness" type="checkbox" class="checkbox-slider-checkbox" autocomplete="off" />
+                  <label class="checkbox-slider-label" for="expand-data-completeness">
+                    <span class="checkbox-slider-inner"></span>
+                    <span class="checkbox-slider-switch"></span>
+                  </label>
+                </span>
+              </span>
+          </span>
+
+        </div>
+      </div>
+      <div class="col-xs-12">
+        <div class="row">
+          <div class="mLR15">
+            <div class="col-xs-12">
+              {% set loop_items = 4 %}
+              {% for category in data.data_completness.categories %}
+                {% if (loop.index - 1) is divisibleby loop_items %}
+                  <div class="row">
+                {% endif %}
+                    <div class="col-xs-3 data-item">
+                      <div class="data-item-summary">
+                        {% set category_hover_title = '<b>' + category.title + '</b>:<br/>' + category.description %}
+                        <div class="categ-title" data-module="bs_tooltip" data-module-placement="top" data-toggle="tooltip"
+                             data-html="true" data-original-title="{{ category_hover_title }}">
+                          {{ category.title }}
+                        </div>
+                        <div class="categ-sub-title">
+
+                          {#
+                          <span class="icon-circle-down">
+                            <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span>
+                          </span>
+                          #}
+                          <span class="dataset-count">{{ category.stats.total_datasets_num }} Datasets</span>
+                        </div>
+                        <div class="completeness-progress">
+                            <div class="progress-breakdown">
+                              <span class="progress-blue" style="width: {{ 100*category.stats.dataseries_good_percentage }}%;" data-module="bs_tooltip" data-module-placement="top"
+                                 data-toggle="tooltip" data-html="true" data-original-title="{{ category.stats.good_dataseries_text }}">
+                              </span>
+                              <span class="progress-striped" style="width: {{ 100*category.stats.dataseries_not_good_percentage }}%;" data-module="bs_tooltip" data-module-placement="top"
+                                 data-toggle="tooltip" data-html="true" data-original-title="{{ category.stats.not_good_dataseries_text }}"></span>
+                              <span class="progress-empty"
+                                 style="width: {{ 100*(1 - category.stats.dataseries_good_percentage - category.stats.dataseries_not_good_percentage) }}%;"
+                                    data-module="bs_tooltip" data-module-placement="top"
+                                 data-toggle="tooltip" data-html="true" data-original-title="{{ category.stats.empty_dataseries_text }}">
+                              </span>
+                            </div>
+                        </div>
+                      </div>
+                      <div class="data-item-details" style="display: none">
+                        {% for subcateg in category.data_series %}
+                        <div class="sub-category">
+                          {% set subcateg_hover_body = '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner tooltip-column"></div></div>' %}
+                          {% set subcateg_hover_title = '<div class="tooltip-content">' + subcateg.description + '</div>' %}
+                          <div class="sub-categ-title" data-module="bs_tooltip" data-module-placement="top" data-toggle="tooltip"
+                               data-original-title="{{ subcateg_hover_title }}" data-container="body" data-html="true" data-template="{{ subcateg_hover_body }}">
+                            {{ subcateg.title }}
+                          </div>
+                          {% if subcateg.datasets | length > 0 %}
+                            {% for dataset in subcateg.datasets %}
+                              {% set dataset_hover_title = dataset.title + "<br/><b>Limitations</b>: " + dataset.general_comment if dataset.general_comment else dataset.title %}
+                              {% set dataset_hover_title = '<div class="tooltip-content">' + dataset_hover_title + '</div>' %}
+                              {% set dataset_hover_body = '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner tooltip-column"></div></div>' %}
+                            <div class="dataset" data-module="bs_tooltip" data-module-placement="top" data-toggle="tooltip"
+                                  data-original-title="{{ dataset_hover_title }}" data-container="body" data-html="true"
+                                  data-template="{{ dataset_hover_body }}">
+                              <span class="data-completeness {% if dataset.is_good %}blue{% else %}striped{% endif %}"></span>
+                              <div class="dataset-link" >
+                                <a href="{{ h.url_for(controller='package', action='read', id=dataset.name) }}" data-module="hdx_click_stopper" data-module-link_type="data grid dataset">
+                                  {{ dataset.title }}
+                                </a>
+                              </div>
+                              <span class="data-org"
+                                title="{{ dataset.organization_title }}">
+                                {{ dataset.organization_title }}
+                              </span>
+                            </div>
+                            {% endfor %}
+                          {% else %}
+                            <div>
+                              {% if c.userobj %}
+                                <a href="javascript:void(0);" onclick="contributeAddDetails(null, 'data grid');" class="add-data">Add Data</a>
+                              {% else %}
+                                <a href="/contribute" class="add-data" data-module="hdx_click_stopper" data-module-link_type="data grid add data">Add Data</a>
+                              {% endif %}
+                            </div>
+                          {% endif %}
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                {% if ((loop.index) is divisibleby loop_items) or (loop.index == data.data_completness.categories|length) %}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="mLR15">
+            <div class="col-xs-11">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+
+    <div class="row">
+        <div class="col-xs-12">
+			<div class="row">
+                {% if data.widgets.show and false %}
+                    <div class="col-xs-12">
+                        <div class="mBottom15 mTop15" style="border-bottom: 1px solid #dddddd;"> </div>
+                    </div>
+                {% endif %}
+	        	<div class="col-xs-12">
+                    {% snippet 'search/snippets/search_results_wrapper.html', tracking_enabled=g.tracking_enabled, my_c=c %}
+	        	</div>
+    		</div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block package_search_results %}
+{% endblock %}
+
+{% block scripts2 %}
+    {{ super() }}
+    {% resource 'hdx_theme/activity-stream' %}
+    {% resource 'hdx_theme/country' %}
+    {% resource 'hdx_theme/hdx_show_more.js' %}
+{% endblock %}
