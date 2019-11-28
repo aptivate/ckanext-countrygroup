@@ -1,0 +1,58 @@
+/*
+ *  --- AUTO-GENERATED ---
+ * Please edit the LESS files
+ */
+.contentBackground.twoColumnBackground {
+  background-image: none;
+  background-color: #ffffff;
+  min-height: auto;
+}
+.org-logo-large {
+  width: 185px;
+  height: 100%;
+  text-align: center;
+}
+.org-logo-large img {
+  max-height: 65px;
+  max-width: 160px;
+}
+/* search_form.html customisations */
+.list-items.search-form {
+  border-bottom: none;
+  margin: 0;
+  padding: 0;
+}
+.list-items.search-form h2 {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  margin-left: 40px;
+}
+.list-items.search-form .search-input.search-giant input {
+  border-radius: 14px;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  margin-left: 40px;
+}
+.list-items.search-form .search-input {
+  margin-bottom: 25px;
+  margin-left: 40px;
+}
+#hdx-dataset {
+  right: 30%;
+  left: 30%;
+  width: 350px;
+  height: 190px;
+  background: #fff;
+}
+#hdx-dataset .modal-header {
+  background: #007CE0;
+  color: #fff;
+  height: 60px;
+}
+#hdx-dataset h3 {
+  margin-top: 0px;
+}
+.info-wrapper .empty .info-item-name {
+  color: #007CE0;
+}

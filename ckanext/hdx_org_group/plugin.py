@@ -26,6 +26,8 @@ class HDXGroupPlugin(plugins.SingletonPlugin, lib_plugins.DefaultGroupForm):
     plugins.implements(plugins.IGroupController, inherit=True)
     plugins.implements(plugins.IRoutes, inherit=True)
     plugins.implements(plugins.IActions)
+    plugins.implements(plugins.IConfigurer)
+    plugins.implements(plugins.ITemplateHelpers)
 
     def group_types(self):
         return [group_type]
@@ -133,4 +135,17 @@ class HDXGroupPlugin(plugins.SingletonPlugin, lib_plugins.DefaultGroupForm):
         from ckanext.hdx_theme.helpers import actions as hdx_actions
         return {
             'cached_group_list': hdx_actions.cached_group_list,
+        }
+
+    # IConfigurer
+    def update_config(self, config_):
+        tk.add_template_directory(config_, 'templates')
+        tk.add_public_directory(config_, 'public')
+        tk.add_resource('fanstatic', 'hdx_org_group')
+
+    # ITemplateHelpers
+    def get_helpers(self):
+        from ckanext.hdx_theme.helpers import helpers as hdx_helpers
+        return {
+            'hdx_get_ckan_config': hdx_helpers.hdx_get_ckan_config,
         }

@@ -1,0 +1,12 @@
+How to update the icon bundles:
+  - go to https://icomoon.io/app
+  - top left menu -> Manage Projects -> Import Project
+  - select for example: icomoon-hdx-icons.json
+  - click load on the HDX project
+  - Import icons -> to add new icons
+  - Generate Font -> Download
+  - extract ZIP
+  - copy content of fonts folder into the css/fonts folder inside the project
+  - copy style.css to css/hdx-icons.css for example
+  - export settings: Projects -> HDX -> download
+  - replace previous file "icomoo-hdx-icons.json"

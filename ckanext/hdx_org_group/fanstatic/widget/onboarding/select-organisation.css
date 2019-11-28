@@ -1,0 +1,42 @@
+.two-column-select-organisation .two-column-left {
+  height: 560px;
+}
+.two-column-select-organisation .two-column-left .regular-text {
+  color: #cccccc;
+}
+.two-column-select-organisation .two-column-left .star-text {
+  color: red;
+}
+.two-column-select-organisation .two-column-left .star-box {
+  background-color: #eeeeee;
+  padding: 10px;
+  border-radius: 5px;
+}
+.two-column-select-organisation .two-column-right {
+  height: 560px;
+  padding: 60px;
+}
+.two-column-select-organisation .two-column-right #create-organisation {
+  overflow: scroll;
+  height: 400px;
+}
+.two-column-select-organisation .two-column-right #org-description {
+  height: 120px;
+  padding: 14px 20px;
+}
+.two-column-select-organisation .two-column-right #org-description ~ label {
+  bottom: 76px;
+}
+.two-column-select-organisation .two-column-right #org-description.input-content ~ label {
+  bottom: 6px;
+}
+.two-column-select-organisation .two-column-right #org-description-data {
+  height: 120px;
+  padding: 14px 20px;
+}
+.two-column-select-organisation .two-column-right #org-description-data ~ label {
+  bottom: 76px;
+}
+.two-column-select-organisation .two-column-right #org-description-data.input-content ~ label {
+  bottom: 6px;
+}
